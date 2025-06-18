@@ -4,9 +4,9 @@ use mux_attrs::{From, Mux};
 #[mux_names(B)]
 #[derive(From)]
 #[from(A, B)]
-struct A {
+struct A<T> {
     x: i32,
-    y: bool,
+    y: T,
 }
 
 #[derive(Mux)]
@@ -21,12 +21,12 @@ enum C {
 
 fn main() {
     assert!(matches!(
-        A { x: 123, y: true }.into(),
-        B { x: 123, y: true },
+        A::<bool> { x: 123, y: true }.into(),
+        B::<bool> { x: 123, y: true },
     ));
     assert!(matches!(
-        B { x: 321, y: false }.into(),
-        A { x: 321, y: false },
+        B::<char> { x: 321, y: 'a' }.into(),
+        A::<char> { x: 321, y: 'a' },
     ));
 
     assert!(matches!(C::U.into(), D::U));

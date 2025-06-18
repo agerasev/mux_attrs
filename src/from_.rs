@@ -37,11 +37,14 @@ pub fn derive(input: TokenStream) -> Result<TokenStream> {
 fn derive_single(input: DeriveInput, src: Path) -> Result<TokenStream> {
     let dst = input.ident;
 
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+
     let struct_init = match input.data {
         Data::Struct(data) => {
             let fields = list_fields(data.fields);
+            let ty_generics = ty_generics.as_turbofish();
             quote! {
-                let #src #fields = value;
+                let #src #ty_generics #fields = value;
                 Self #fields
             }
         }
@@ -67,8 +70,8 @@ fn derive_single(input: DeriveInput, src: Path) -> Result<TokenStream> {
     };
 
     Ok(quote! {
-        impl From<#src> for #dst {
-            fn from(value: #src) -> Self {
+        impl #impl_generics From<#src #ty_generics> for #dst #ty_generics #where_clause {
+            fn from(value: #src #ty_generics) -> Self {
                 #struct_init
             }
         }
